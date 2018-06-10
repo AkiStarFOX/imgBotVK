@@ -8,11 +8,13 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+//    mavenCentral()
+    jcenter()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'com.google.firebase:firebase-core:16.0.0'
     compile 'com.vk.api:sdk:0.5.12'
 
     //Binding for Log4J -->
@@ -21,7 +23,8 @@ dependencies {
 //Log4j API and Core implementation required for binding
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
+//    compile 'com.backendless:backendless:5.0.0'
 
-    compile 'ru.prof-itgroup:scorocode_sdk:1.1.0'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.11'
 
 }

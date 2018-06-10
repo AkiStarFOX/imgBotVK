@@ -1,3 +1,4 @@
+
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -10,17 +11,22 @@ import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.photos.PhotoXtrRealOffset;
 import com.vk.api.sdk.objects.photos.responses.GetAllResponse;
 import com.vk.api.sdk.objects.photos.responses.GetResponse;
+import org.w3c.dom.css.RGBColor;
 
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.*;
 import java.util.List;
-import java.util.Properties;
 
 public class Main {
     private final static String PROPERTIES_FILE = "config.properties";
@@ -30,12 +36,19 @@ public class Main {
             + "&redirect_uri={REDIRECT_URI}"
             + "&display={DISPLAY}"
             + "&response_type=token";
-    public static void main(String[] args) throws FileNotFoundException, ClientException, ApiException {
-        Properties properties = readProperties();
+    private static final String MYSQL_URL = "jdbc:mysql://localhost:3306/imgdb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private static final String MYSQL_LOGIN = "root";
+    private static final String MYSQL_PASSWORD = "root";
 
+
+    public static void main(String[] args) throws FileNotFoundException, ClientException, ApiException, SQLException {
+        Properties properties = readProperties();
         HttpTransportClient client = new HttpTransportClient();
         VkApiClient apiClient = new VkApiClient(client);
-//
+        UserActor actor = initVkApi(apiClient,properties);
+
+
+//      Получение токена
 //        try {
 //            auth("6502666");
 //        } catch (IOException e) {
@@ -43,20 +56,45 @@ public class Main {
 //        }
 
 
-        UserActor actor = initVkApi(apiClient,properties);
 
+        // получение фото со стены
         GetResponse getAllResponse=apiClient.photos().get(actor)
                 .ownerId(-104375368)
                 .albumId("wall")
                 .rev(true)
-                .count(10)
+                .count(30)
                 .execute();
 
         System.out.println(getAllResponse.getCount());
         List<Photo> list = getAllResponse.getItems();
-        for (Photo x:list){
-            System.out.println(x.getPhoto130());
+        HashMap<String,String> map = downloadImg(list);
+        for (Map.Entry<String,String> m:map.entrySet()){
+            System.out.println(m.getKey()+ " " + m.getValue());
         }
+
+
+
+        try (Connection connection = DriverManager.getConnection(MYSQL_URL, MYSQL_LOGIN, MYSQL_PASSWORD);
+
+                ){
+
+            if (!connection.isClosed()) {
+                System.out.println("Соединение с БД установлено");
+            }
+
+            Statement statement = connection.createStatement();
+            for (Map.Entry<String,String> m:map.entrySet()){
+                statement.addBatch("INSERT INTO images (URL,color) VALUES ('"+m.getKey()+"','"+m.getValue()+"')");
+
+            }
+                statement.executeBatch();
+                statement.clearBatch();
+
+
+        }catch (SQLException e){
+            System.out.println("ERROR" + e.getMessage());
+        }
+
 
 
 
@@ -97,4 +135,45 @@ public class Main {
             throw new RuntimeException("Incorrect properties file");
         }
     }
+
+    public static HashMap<String,String> downloadImg(List<Photo> list){
+        File file = null;
+        HashMap<String,String> hashMap = new HashMap<String,String>();
+        try {
+
+            for (int i=0;i<list.size();i++){
+                String fileName = "google"+i+".png";
+                if(list.get(i).getPhoto604()!=null) {
+                    BufferedImage img = ImageIO.read(new URL(list.get(i).getPhoto604()));
+                    file = new File(fileName);
+                    if (!file.exists()) {
+                        file.createNewFile();
+
+                    }
+                    BufferedImage scaled = new BufferedImage(1, 1,
+                            BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g = scaled.createGraphics();
+                    g.drawImage(img, 0, 0, 1, 1, null);
+                    g.dispose();
+
+
+                    ImageIO.write(scaled, "png", file);
+
+                    int blue = scaled.getRGB(0, 0) & 255;
+                    int green = (scaled.getRGB(0, 0) >> 8) & 255;
+                    int red = (scaled.getRGB(0, 0) >> 16) & 255;
+                    String hex = String.format("#%02x%02x%02x", red, green, blue);
+                    System.out.println(hex);
+                    hashMap.put(list.get(i).getPhoto604(), hex);
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return hashMap;
+    }
+
 }
