@@ -39,13 +39,18 @@ public class Main {
     private static final String MYSQL_URL = "jdbc:mysql://localhost:3306/imgdb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static final String MYSQL_LOGIN = "root";
     private static final String MYSQL_PASSWORD = "root";
+    private static int offset = 1;
+    private static ArrayList<String> idList = new ArrayList<>();
 
 
     public static void main(String[] args) throws FileNotFoundException, ClientException, ApiException, SQLException {
         Properties properties = readProperties();
         HttpTransportClient client = new HttpTransportClient();
         VkApiClient apiClient = new VkApiClient(client);
-        UserActor actor = initVkApi(apiClient,properties);
+        UserActor actor = initVkApi(apiClient, properties);
+        Connection connection = DriverManager.getConnection(MYSQL_URL, MYSQL_LOGIN, MYSQL_PASSWORD);
+        Statement statement = connection.createStatement();
+
 
 
 //      Получение токена
@@ -56,48 +61,53 @@ public class Main {
 //        }
 
 
-
-        // получение фото со стены
-        GetResponse getAllResponse=apiClient.photos().get(actor)
-                .ownerId(-104375368)
-                .albumId("wall")
-                .rev(true)
-                .count(30)
-                .execute();
-
-        System.out.println(getAllResponse.getCount());
-        List<Photo> list = getAllResponse.getItems();
-        HashMap<String,String> map = downloadImg(list);
-        for (Map.Entry<String,String> m:map.entrySet()){
-            System.out.println(m.getKey()+ " " + m.getValue());
+        //получение списка URL с БД
+        ResultSet resultSet = statement.executeQuery("select URL from images");
+        while (resultSet.next()) {
+            idList.add(resultSet.getString(1));
         }
 
 
-
-        try (Connection connection = DriverManager.getConnection(MYSQL_URL, MYSQL_LOGIN, MYSQL_PASSWORD);
-
-                ){
-
-            if (!connection.isClosed()) {
-                System.out.println("Соединение с БД установлено");
+        while (true) {
+            List<Photo> list = getPhotoFromVK(offset, apiClient, actor);
+            HashMap<String, String> map = downloadImg(list);
+            for (Map.Entry<String, String> m : map.entrySet()) {
+                System.out.println(m.getKey() + " " + m.getValue());
             }
 
-            Statement statement = connection.createStatement();
-            for (Map.Entry<String,String> m:map.entrySet()){
-                statement.addBatch("INSERT INTO images (URL,color) VALUES ('"+m.getKey()+"','"+m.getValue()+"')");
+            try {
 
-            }
+                for (Map.Entry<String, String> m : map.entrySet()) {
+                    statement.addBatch("INSERT IGNORE INTO images (URL,color) VALUES ('" + m.getKey() + "','" + m.getValue() + "')");
+                }
                 statement.executeBatch();
                 statement.clearBatch();
+            } catch (SQLException e) {
+                System.out.println("ERROR" + e.getMessage());
+            }
+            offset+=100;
 
-
-        }catch (SQLException e){
-            System.out.println("ERROR" + e.getMessage());
         }
 
 
+    }
 
-
+    public static List<Photo> getPhotoFromVK(int offset, VkApiClient vk, UserActor actor) {
+        GetResponse getAllResponse = null;
+        try {
+            getAllResponse = vk.photos().get(actor)
+                    .ownerId(-104375368)
+                    .albumId("wall")
+                    .rev(false)
+                    .count(100)
+                    .offset(offset)
+                    .execute();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (ClientException e) {
+            e.printStackTrace();
+        }
+        return getAllResponse.getItems();
     }
 
     public static void auth(String appId) throws IOException {
@@ -112,6 +122,7 @@ public class Main {
             throw new IOException(ex);
         }
     }
+
     private static UserActor initVkApi(VkApiClient apiClient, Properties properties) {
         int groupId = Integer.parseInt(properties.getProperty("groupId"));
         String token = properties.getProperty("token");
@@ -136,35 +147,50 @@ public class Main {
         }
     }
 
-    public static HashMap<String,String> downloadImg(List<Photo> list){
+    public static HashMap<String, String> downloadImg(List<Photo> list) {
         File file = null;
-        HashMap<String,String> hashMap = new HashMap<String,String>();
+        BufferedImage img=null;
+        boolean isLoaded=true;
+        HashMap<String, String> hashMap = new HashMap<String, String>();
         try {
 
-            for (int i=0;i<list.size();i++){
-                String fileName = "google"+i+".png";
-                if(list.get(i).getPhoto604()!=null) {
-                    BufferedImage img = ImageIO.read(new URL(list.get(i).getPhoto604()));
-                    file = new File(fileName);
-                    if (!file.exists()) {
-                        file.createNewFile();
+            for (int i = 0; i < list.size(); i++) {
+                String fileName = "google" + i + ".png";
 
+                if (list.get(i).getPhoto807() != null) {
+                    System.out.println("Мы попали в первую проверку");
+                    if(list.get(i).getPhoto1280() != null){
+                        System.out.println("Мы попали в проверку 1280");
+                        img = ImageIO.read(new URL(list.get(i).getPhoto1280()));
+//
+                    }else {
+                        System.out.println("Мы попали в проверку 807");
+                        img = ImageIO.read(new URL(list.get(i).getPhoto807()));
+//
                     }
-                    BufferedImage scaled = new BufferedImage(1, 1,
-                            BufferedImage.TYPE_INT_RGB);
-                    Graphics2D g = scaled.createGraphics();
-                    g.drawImage(img, 0, 0, 1, 1, null);
-                    g.dispose();
+                    if (isLoaded) {
+                        System.out.println("загружаем");
+                        file = new File(fileName);
+                        if (!file.exists()) {
+                            file.createNewFile();
+
+                        }
+                        BufferedImage scaled = new BufferedImage(1, 1,
+                                BufferedImage.TYPE_INT_RGB);
+                        Graphics2D g = scaled.createGraphics();
+                        g.drawImage(img, 0, 0, 1, 1, null);
+                        g.dispose();
 
 
-                    ImageIO.write(scaled, "png", file);
+                        ImageIO.write(scaled, "png", file);
 
-                    int blue = scaled.getRGB(0, 0) & 255;
-                    int green = (scaled.getRGB(0, 0) >> 8) & 255;
-                    int red = (scaled.getRGB(0, 0) >> 16) & 255;
-                    String hex = String.format("#%02x%02x%02x", red, green, blue);
-                    System.out.println(hex);
-                    hashMap.put(list.get(i).getPhoto604(), hex);
+                        int blue = scaled.getRGB(0, 0) & 255;
+                        int green = (scaled.getRGB(0, 0) >> 8) & 255;
+                        int red = (scaled.getRGB(0, 0) >> 16) & 255;
+                        String hex = String.format("#%02x%02x%02x", red, green, blue);
+                        System.out.println(hex);
+                        hashMap.put(list.get(i).getPhoto604(), hex);
+                    }
                 }
             }
 

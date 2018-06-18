@@ -29,10 +29,11 @@
       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="586">
-              <caret line="87" lean-forward="true" selection-start-line="87" selection-end-line="87" />
+            <state relative-caret-position="314">
+              <caret line="101" column="30" selection-start-line="101" selection-start-column="30" selection-end-line="101" selection-end-column="30" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="method#auth#0;class#Main#0" />
                 <element signature="method#initVkApi#0;class#Main#0" />
                 <element signature="method#readProperties#0;class#Main#0" />
               </folding>
@@ -40,17 +41,20 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="images" pinned="false" current-in-tab="false">
-        <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images">
-          <provider selected="true" editor-type-id="1.DATA">
-            <state row-count="100" readonly="false">
-              <columns>
-                <column name="id" position="0" visible="true" />
-                <column name="URL" position="1" visible="true" />
-                <column name="color" position="2" visible="true" />
-              </columns>
-              <sorting />
-              <content-types />
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="317">
+              <caret line="27" column="4" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="75" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="config.properties" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/config.properties">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="17">
+              <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -432,15 +436,14 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/resources/config.properties" />
         <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/src/main/resources/config.properties" />
         <option value="$PROJECT_DIR$/src/main/java/Main.java" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="785" />
-    <option name="y" value="107" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="793" />
     <option name="width" value="814" />
     <option name="height" value="867" />
   </component>
@@ -451,7 +454,6 @@
     </navigator>
     <panes>
       <pane id="AndroidView" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -477,10 +479,18 @@
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="ImgBot" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ImgBotVK" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -575,39 +585,39 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1616" height="876" extended-state="7" />
+    <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" id="DB Browser" visible="true" weight="0.15938303" />
+      <window_info id="DB Browser" order="2" visible="true" weight="0.1651671" />
       <window_info anchor="bottom" id="Messages" order="7" weight="0.3292683" />
       <window_info anchor="right" id="Palette&#9;" order="3" />
       <window_info id="Image Layers" order="2" />
-      <window_info anchor="bottom" id="DB Execution Console" />
+      <window_info anchor="bottom" id="DB Execution Console" order="7" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50064266" side_tool="true" weight="0.3292683" />
       <window_info anchor="right" id="Maven Projects" order="3" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4993573" weight="0.3292683" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4993573" visible="true" weight="0.3292683" />
-      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.3292683" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
       <window_info content_ui="combo" id="Project" order="0" weight="0.15359898" />
-      <window_info anchor="bottom" id="Build" order="7" weight="0.3292683" />
       <window_info anchor="right" id="Gradle" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="2" />
       <window_info anchor="right" id="Theme Preview" order="3" />
-      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39972898" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Build" order="7" weight="0.3292683" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -620,7 +630,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="3" />
     </breakpoint-manager>
   </component>
   <component name="antWorkspaceConfiguration">
@@ -630,10 +640,66 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2278">
+          <caret line="181" column="38" selection-start-line="181" selection-start-column="38" selection-end-line="181" selection-end-column="38" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
+            <element signature="method#initVkApi#0;class#Main#0" />
+            <element signature="method#readProperties#0;class#Main#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="27" column="4" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="75" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/config.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="91" selection-start-line="1" selection-start-column="91" selection-end-line="1" selection-end-column="91" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1258">
+          <caret line="74" lean-forward="true" selection-start-line="74" selection-end-line="74" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
+            <element signature="method#initVkApi#0;class#Main#0" />
+            <element signature="method#readProperties#0;class#Main#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images" />
+    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1479">
+          <caret line="87" lean-forward="true" selection-start-line="87" selection-end-line="87" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
+            <element signature="method#initVkApi#0;class#Main#0" />
+            <element signature="method#readProperties#0;class#Main#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images" />
+    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1904">
           <caret line="112" column="25" selection-start-line="112" selection-start-column="25" selection-end-line="112" selection-end-column="25" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
             <element signature="method#initVkApi#0;class#Main#0" />
             <element signature="method#readProperties#0;class#Main#0" />
           </folding>
@@ -660,6 +726,7 @@
           <caret line="112" column="25" selection-start-line="112" selection-start-column="25" selection-end-line="112" selection-end-column="25" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
             <element signature="method#initVkApi#0;class#Main#0" />
             <element signature="method#readProperties#0;class#Main#0" />
           </folding>
@@ -686,6 +753,7 @@
           <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
             <element signature="method#initVkApi#0;class#Main#0" />
             <element signature="method#readProperties#0;class#Main#0" />
           </folding>
@@ -712,6 +780,7 @@
           <caret line="12" selection-start-line="12" selection-end-line="12" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
             <element signature="method#initVkApi#0;class#Main#0" />
             <element signature="method#readProperties#0;class#Main#0" />
           </folding>
@@ -732,20 +801,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="27" column="75" selection-start-line="27" selection-start-column="75" selection-end-line="27" selection-end-column="75" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/config.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="91" selection-start-line="1" selection-start-column="91" selection-end-line="1" selection-end-column="91" />
-        </state>
-      </provider>
-    </entry>
     <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/session_browsers/MySql -imgdb@localhost Sessions">
       <provider selected="true" editor-type-id="0.SESSION_BROWSER">
         <state>
@@ -761,18 +816,13 @@
     </entry>
     <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/consoles/MySql -imgdb@localhost">
       <provider selected="true" editor-type-id="0.CONSOLE">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" current-schema="imgdb" session-id="MAIN">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" current-schema="imgdb" session-id="MAIN" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/google6.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/google8.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/google0.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/google28.png">
@@ -823,14 +873,51 @@
     <entry file="file://$PROJECT_DIR$/google3.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/google1.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/google4.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/google2.png">
       <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/google1.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/google0.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images" />
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="317">
+          <caret line="27" column="4" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="75" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images">
+      <provider selected="true" editor-type-id="1.DATA">
+        <state row-count="0" readonly="false">
+          <columns>
+            <column name="id" position="0" visible="true" />
+            <column name="URL" position="1" visible="true" />
+            <column name="color" position="2" visible="true" />
+          </columns>
+          <sorting />
+          <content-types />
+        </state>
+      </provider>
+    </entry>
+    <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images">
+      <provider selected="true" editor-type-id="1.DATA">
+        <state row-count="0" readonly="false">
+          <columns>
+            <column name="id" position="0" visible="true" />
+            <column name="URL" position="1" visible="true" />
+            <column name="color" position="2" visible="true" />
+          </columns>
+          <sorting />
+          <content-types />
+        </state>
+      </provider>
     </entry>
     <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images">
       <provider selected="true" editor-type-id="1.DATA">
@@ -845,12 +932,21 @@
         </state>
       </provider>
     </entry>
+    <entry file="db://3a4f2767-19c2-476c-973a-22a016c32dd9/objects/schemas/imgdb/tables/images" />
+    <entry file="file://$PROJECT_DIR$/src/main/resources/config.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="586">
-          <caret line="87" lean-forward="true" selection-start-line="87" selection-end-line="87" />
+        <state relative-caret-position="314">
+          <caret line="101" column="30" selection-start-line="101" selection-start-column="30" selection-end-line="101" selection-end-column="30" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#auth#0;class#Main#0" />
             <element signature="method#initVkApi#0;class#Main#0" />
             <element signature="method#readProperties#0;class#Main#0" />
           </folding>
