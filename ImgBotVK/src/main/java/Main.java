@@ -1,4 +1,3 @@
-
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -70,15 +69,16 @@ public class Main {
 
         while (true) {
             List<Photo> list = getPhotoFromVK(offset, apiClient, actor);
-            HashMap<String, String> map = downloadImg(list);
-            for (Map.Entry<String, String> m : map.entrySet()) {
+            HashMap<String, HSV> map = downloadImg(list);
+            for (Map.Entry<String, HSV> m : map.entrySet()) {
                 System.out.println(m.getKey() + " " + m.getValue());
             }
 
             try {
 
-                for (Map.Entry<String, String> m : map.entrySet()) {
-                    statement.addBatch("INSERT IGNORE INTO images (URL,color) VALUES ('" + m.getKey() + "','" + m.getValue() + "')");
+                for (Map.Entry<String, HSV> m : map.entrySet()) {
+//
+                    statement.addBatch(sqlAdd(m.getKey(),m.getValue().getHsvArray()));
                 }
                 statement.executeBatch();
                 statement.clearBatch();
@@ -147,49 +147,53 @@ public class Main {
         }
     }
 
-    public static HashMap<String, String> downloadImg(List<Photo> list) {
+    public static HashMap<String, HSV> downloadImg(List<Photo> list) {
         File file = null;
         BufferedImage img=null;
         boolean isLoaded=true;
-        HashMap<String, String> hashMap = new HashMap<String, String>();
+        boolean is1280=false;
+        HashMap<String, HSV> hashMap = new HashMap<String, HSV>();
         try {
 
             for (int i = 0; i < list.size(); i++) {
                 String fileName = "google" + i + ".png";
 
                 if (list.get(i).getPhoto807() != null) {
-                    System.out.println("Мы попали в первую проверку");
+
                     if(list.get(i).getPhoto1280() != null){
-                        System.out.println("Мы попали в проверку 1280");
+
                         img = ImageIO.read(new URL(list.get(i).getPhoto1280()));
+                        is1280 = true;
 //
                     }else {
-                        System.out.println("Мы попали в проверку 807");
+
                         img = ImageIO.read(new URL(list.get(i).getPhoto807()));
+
+                        is1280=false;
 //
                     }
                     if (isLoaded) {
-                        System.out.println("загружаем");
                         file = new File(fileName);
                         if (!file.exists()) {
                             file.createNewFile();
 
                         }
-                        BufferedImage scaled = new BufferedImage(1, 1,
-                                BufferedImage.TYPE_INT_RGB);
-                        Graphics2D g = scaled.createGraphics();
-                        g.drawImage(img, 0, 0, 1, 1, null);
-                        g.dispose();
 
 
-                        ImageIO.write(scaled, "png", file);
 
-                        int blue = scaled.getRGB(0, 0) & 255;
-                        int green = (scaled.getRGB(0, 0) >> 8) & 255;
-                        int red = (scaled.getRGB(0, 0) >> 16) & 255;
-                        String hex = String.format("#%02x%02x%02x", red, green, blue);
-                        System.out.println(hex);
-                        hashMap.put(list.get(i).getPhoto604(), hex);
+                        ImageIO.write(img, "png", file);
+
+                        int[][] array = ColorThief.getPalette(img,5,1,true);
+
+                        if(is1280){
+
+                            hashMap.put(list.get(i).getPhoto1280(), new HSV(array));
+                        }else {
+                            hashMap.put(list.get(i).getPhoto807(), new HSV(array));
+
+                        }
+
+
                     }
                 }
             }
@@ -200,6 +204,20 @@ public class Main {
         }
 
         return hashMap;
+    }
+    public static String sqlAdd(String key,float[][] array){
+        StringBuilder s = new StringBuilder("INSERT IGNORE INTO imagesHSV (URL,H1,S1,V1,H2,S2,V2,H3,S3,V3,H4,S4,V4,H5,S5,V5) VALUES ('" + key + "'");
+        for (int i=0;i<array.length;i++){
+            s.append(",'")
+                    .append(array[i][0])
+                    .append("','")
+                    .append(array[i][1])
+                    .append("','")
+                    .append(array[i][2])
+                    .append("'");
+        }
+        s.append(")");
+        return s.toString();
     }
 
 }
