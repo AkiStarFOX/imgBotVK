@@ -38,7 +38,7 @@ public class Main {
     private static final String MYSQL_URL = "jdbc:mysql://localhost:3306/imgdb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static final String MYSQL_LOGIN = "root";
     private static final String MYSQL_PASSWORD = "root";
-    private static int offset = 1;
+    private static int offset = 0;
     private static ArrayList<String> idList = new ArrayList<>();
 
 
@@ -51,7 +51,6 @@ public class Main {
         Statement statement = connection.createStatement();
 
 
-
 //      Получение токена
 //        try {
 //            auth("6502666");
@@ -60,32 +59,24 @@ public class Main {
 //        }
 
 
-        //получение списка URL с БД
-        ResultSet resultSet = statement.executeQuery("select URL from images");
-        while (resultSet.next()) {
-            idList.add(resultSet.getString(1));
-        }
-
-
         while (true) {
             List<Photo> list = getPhotoFromVK(offset, apiClient, actor);
-            HashMap<String, HSV> map = downloadImg(list);
-            for (Map.Entry<String, HSV> m : map.entrySet()) {
-                System.out.println(m.getKey() + " " + m.getValue());
-            }
+            HashMap<Integer, HSV> map = downloadImg(list);
+
 
             try {
 
-                for (Map.Entry<String, HSV> m : map.entrySet()) {
-//
-                    statement.addBatch(sqlAdd(m.getKey(),m.getValue().getHsvArray()));
+                for (Map.Entry<Integer, HSV> m : map.entrySet()) {
+                    statement.addBatch(sqlAddWithHisto(m.getKey(),m.getValue().URL,m.getValue().getHisto().getH(),m.getValue().getHisto().getS(),m.getValue().getHisto().getV()));
+//                    statement.addBatch(sqlAdd(m.getKey(), m.getValue().getHslArray(), m.getValue().getURL()));
+
                 }
                 statement.executeBatch();
                 statement.clearBatch();
             } catch (SQLException e) {
                 System.out.println("ERROR" + e.getMessage());
             }
-            offset+=100;
+            offset += 100;
 
         }
 
@@ -110,18 +101,6 @@ public class Main {
         return getAllResponse.getItems();
     }
 
-    public static void auth(String appId) throws IOException {
-        String reqUrl = AUTH_URL
-                .replace("{APP_ID}", appId)
-                .replace("{PERMISSIONS}", "photos,messages")
-                .replace("{REDIRECT_URI}", "https://oauth.vk.com/blank.html")
-                .replace("{DISPLAY}", "page");
-        try {
-            Desktop.getDesktop().browse(new URL(reqUrl).toURI());
-        } catch (URISyntaxException ex) {
-            throw new IOException(ex);
-        }
-    }
 
     private static UserActor initVkApi(VkApiClient apiClient, Properties properties) {
         int groupId = Integer.parseInt(properties.getProperty("groupId"));
@@ -147,31 +126,24 @@ public class Main {
         }
     }
 
-    public static HashMap<String, HSV> downloadImg(List<Photo> list) {
+    public static HashMap<Integer, HSV> downloadImg(List<Photo> list) {
         File file = null;
-        BufferedImage img=null;
-        boolean isLoaded=true;
-        boolean is1280=false;
-        HashMap<String, HSV> hashMap = new HashMap<String, HSV>();
+        BufferedImage img = null;
+        boolean isLoaded = true;
+        boolean is1280 = false;
+        HashMap<Integer, HSV> hashMap = new HashMap<Integer, HSV>();
         try {
 
             for (int i = 0; i < list.size(); i++) {
                 String fileName = "google" + i + ".png";
 
-                if (list.get(i).getPhoto807() != null) {
 
-                    if(list.get(i).getPhoto1280() != null){
+                if (list.get(i).getPhoto1280() != null) {
 
-                        img = ImageIO.read(new URL(list.get(i).getPhoto1280()));
-                        is1280 = true;
+                    img = ImageIO.read(new URL(list.get(i).getPhoto1280()));
+
 //
-                    }else {
 
-                        img = ImageIO.read(new URL(list.get(i).getPhoto807()));
-
-                        is1280=false;
-//
-                    }
                     if (isLoaded) {
                         file = new File(fileName);
                         if (!file.exists()) {
@@ -179,23 +151,36 @@ public class Main {
 
                         }
 
+//                        ImageIO.write(img, "png", file);
+//                        int[][] array = ColorThief.getPalette(img, 5, 1, false);
 
-
-                        ImageIO.write(img, "png", file);
-
-                        int[][] array = ColorThief.getPalette(img,5,1,true);
-
-                        if(is1280){
-
-                            hashMap.put(list.get(i).getPhoto1280(), new HSV(array));
-                        }else {
-                            hashMap.put(list.get(i).getPhoto807(), new HSV(array));
-
+                        Histo histo = new Histo(img);
+                        System.out.println("-------H--------");
+                        for (Map.Entry h:histo.getH().entrySet()){
+                            System.out.println("ключH = "+h.getKey() + " значениеH = " + h.getValue());
                         }
+                        System.out.println("-------S--------");
+                        for (Map.Entry h:histo.getS().entrySet()){
+                            System.out.println("ключS = "+h.getKey() + " значениеS = "+ h.getValue());
+                        }
+                        System.out.println("-------V--------");
+                        for (Map.Entry h:histo.getV().entrySet()){
+                            System.out.println("ключV = "+h.getKey() + " значениеV = "+ h.getValue());
+                        }
+                        TreeMap<Integer, Float> map123 = histo.getH();
+                        System.out.println(list.get(i).getPhoto1280());
+                        hashMap.put(list.get(i).getId(), new HSV(histo, list.get(i).getPhoto1280()));
+
+
+                        for (Map.Entry e : map123.entrySet()) {
+                            System.out.println(e.getKey() + " " + String.format("%.2f", (float) e.getValue()));
+                        }
+
 
 
                     }
                 }
+
             }
 
 
@@ -205,9 +190,10 @@ public class Main {
 
         return hashMap;
     }
-    public static String sqlAdd(String key,float[][] array){
-        StringBuilder s = new StringBuilder("INSERT IGNORE INTO imagesHSV (URL,H1,S1,V1,H2,S2,V2,H3,S3,V3,H4,S4,V4,H5,S5,V5) VALUES ('" + key + "'");
-        for (int i=0;i<array.length;i++){
+
+    public static String sqlAdd(Integer key, float[][] array, String URL) {
+        StringBuilder s = new StringBuilder("INSERT IGNORE INTO imagesHSV (Img_id,URL,H1,S1,V1,H2,S2,V2,H3,S3,V3,H4,S4,V4,H5,S5,V5) VALUES ('" + key + "','" + URL + "'");
+        for (int i = 0; i < array.length; i++) {
             s.append(",'")
                     .append(array[i][0])
                     .append("','")
@@ -217,7 +203,51 @@ public class Main {
                     .append("'");
         }
         s.append(")");
+
         return s.toString();
     }
+
+    public static String sqlAddWithHisto(Integer key, String URL, Map<Integer, Float> histH, Map<Integer, Float> histS, Map<Integer, Float> histV) {
+        StringBuilder s = new StringBuilder("INSERT IGNORE INTO imagesHSV (Img_id,URL");
+
+
+        for (Map.Entry m : histH.entrySet()) {
+            s.append(",H")
+                    .append(m.getKey());
+        }
+        for (Map.Entry m : histS.entrySet()) {
+            s.append(",S")
+                    .append(m.getKey());
+        }
+        for (Map.Entry m : histV.entrySet()) {
+            s.append(",V")
+                    .append(m.getKey());
+        }
+        s.append(") VALUES ('")
+                .append(key)
+                .append("','")
+                .append(URL)
+        .append("'");
+        for (Map.Entry m : histH.entrySet()) {
+            s.append(",'")
+                    .append(m.getValue())
+                    .append("'");
+        }
+        for (Map.Entry m : histS.entrySet()) {
+            s.append(",'")
+                    .append(m.getValue())
+                    .append("'");
+        }
+        for (Map.Entry m : histV.entrySet()) {
+            s.append(",'")
+                    .append(m.getValue())
+                    .append("'");
+        }
+        s.append(")");
+
+
+        return s.toString();
+    }
+
 
 }

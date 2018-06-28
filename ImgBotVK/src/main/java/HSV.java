@@ -8,6 +8,21 @@ public class HSV {
     int g;
     int b;
     float[][] hsvArray;
+    String URL;
+    Histo histo;
+
+
+
+    public static HSV getHSV(int red,int green,int blue){
+        return new HSV(red,green,blue);
+    }
+    public String getURL() {
+        return URL;
+    }
+
+    public void setURL(String URL) {
+        this.URL = URL;
+    }
 
     public HSV(float h, float s, float v) {
         this.h = h;
@@ -25,17 +40,26 @@ public class HSV {
         this.s=hsv[1];
         this.v=hsv[2];
     }
-    public HSV(int[][] pallete){
+    public HSV(int[][] pallete,String URL){
         hsvArray=new float[pallete.length][3];
+        this.URL=URL;
+
         for (int i = 0; i < pallete.length; i++) {
             float[] hsv1 = new float[3];
             Color.RGBtoHSB(pallete[i][0],pallete[i][1],pallete[i][2],hsv1);
             hsvArray[i][0] = hsv1[0];
             hsvArray[i][1] = hsv1[1];
             hsvArray[i][2] = hsv1[2];
-
-
         }
+
+    }
+    public HSV(Histo histo,String URL){
+        this.URL=URL;
+        this.histo=histo;
+    }
+
+    public Histo getHisto() {
+        return histo;
     }
 
     public float getH() {
