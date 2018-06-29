@@ -10,6 +10,7 @@ public class HSV {
     float[][] hsvArray;
     String URL;
     Histo histo;
+    PixelReader pixelReader;
 
 
 
@@ -53,13 +54,16 @@ public class HSV {
         }
 
     }
-    public HSV(Histo histo,String URL){
+    public HSV(PixelReader pixelReader,String URL){
         this.URL=URL;
-        this.histo=histo;
+        this.pixelReader = pixelReader;
     }
 
     public Histo getHisto() {
         return histo;
+    }
+    public PixelReader getPixelReader(){
+        return pixelReader;
     }
 
     public float getH() {

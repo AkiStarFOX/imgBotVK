@@ -58,6 +58,15 @@ public class Main {
 //            e.printStackTrace();
 //        }
 
+//        for(int i=0;i<16;i++){
+//            statement.execute("ALTER TABLE imageshsv ADD COLUMN Black DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE imageshsv ADD COLUMN Grey DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE imageshsv ADD COLUMN White DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE imageshsv ADD COLUMN LG DECIMAL(8,6) NOT NULL;");
+//        }
+//        for(int i=0;i<16;i++){
+//            statement.execute("ALTER TABLE imageshsv ADD COLUMN Pink"+ i+" DECIMAL(8,6) NOT NULL;");
+//        }
 
         while (true) {
             List<Photo> list = getPhotoFromVK(offset, apiClient, actor);
@@ -67,12 +76,16 @@ public class Main {
             try {
 
                 for (Map.Entry<Integer, HSV> m : map.entrySet()) {
-                    statement.addBatch(sqlAddWithHisto(m.getKey(),m.getValue().URL,m.getValue().getHisto().getH(),m.getValue().getHisto().getS(),m.getValue().getHisto().getV()));
-//                    statement.addBatch(sqlAdd(m.getKey(), m.getValue().getHslArray(), m.getValue().getURL()));
+//                    statement.addBatch(sqlAddWithHisto(m.getKey(),m.getValue().URL,m.getValue().getHisto().getH(),m.getValue().getHisto().getS(),m.getValue().getHisto().getV()));
 
+//                    statement.addBatch(sqlAdd(m.getKey(), m.getValue().getHslArray(), m.getValue().getURL()));
+                    PixelReader px = m.getValue().getPixelReader();
+//                    System.out.println(sqlAddWithHisto(m.getKey(),m.getValue().getURL(),px.getResultMap(),px.getBlack(),px.getGrey(),px.getWhite(),px.getLigth_grey()));
+                    statement.addBatch(sqlAddWithHisto(m.getKey(),m.getValue().getURL(),px.getResultMap(),px.getBlack(),px.getGrey(),px.getWhite(),px.getLigth_grey()));
                 }
                 statement.executeBatch();
                 statement.clearBatch();
+
             } catch (SQLException e) {
                 System.out.println("ERROR" + e.getMessage());
             }
@@ -153,28 +166,15 @@ public class Main {
 
 //                        ImageIO.write(img, "png", file);
 //                        int[][] array = ColorThief.getPalette(img, 5, 1, false);
-
                         Histo histo = new Histo(img);
-                        System.out.println("-------H--------");
-                        for (Map.Entry h:histo.getH().entrySet()){
-                            System.out.println("ключH = "+h.getKey() + " значениеH = " + h.getValue());
-                        }
-                        System.out.println("-------S--------");
-                        for (Map.Entry h:histo.getS().entrySet()){
-                            System.out.println("ключS = "+h.getKey() + " значениеS = "+ h.getValue());
-                        }
-                        System.out.println("-------V--------");
-                        for (Map.Entry h:histo.getV().entrySet()){
-                            System.out.println("ключV = "+h.getKey() + " значениеV = "+ h.getValue());
-                        }
-                        TreeMap<Integer, Float> map123 = histo.getH();
+                        PixelReader px = new PixelReader(img);
                         System.out.println(list.get(i).getPhoto1280());
-                        hashMap.put(list.get(i).getId(), new HSV(histo, list.get(i).getPhoto1280()));
 
 
-                        for (Map.Entry e : map123.entrySet()) {
-                            System.out.println(e.getKey() + " " + String.format("%.2f", (float) e.getValue()));
-                        }
+
+                        hashMap.put(list.get(i).getId(), new HSV(px, list.get(i).getPhoto1280()));
+
+
 
 
 
@@ -207,45 +207,78 @@ public class Main {
         return s.toString();
     }
 
-    public static String sqlAddWithHisto(Integer key, String URL, Map<Integer, Float> histH, Map<Integer, Float> histS, Map<Integer, Float> histV) {
+    public static String sqlAddWithHisto(Integer key, String URL, Map<Integer, Map<Integer, Float>> resultMap,float black,float grey,float white,float lg) {
+
         StringBuilder s = new StringBuilder("INSERT IGNORE INTO imagesHSV (Img_id,URL");
+//
+//        for (Map.Entry p: resultMap.entrySet()) {
+//            if ((int) p.getKey() == 0) {
+//                Map<Integer, Float> m = (TreeMap<Integer, Float>) p.getValue();
+//                for (Map.Entry k : m.entrySet()) {
+//                    s.append(",R" + k.getValue());
+//                }
+//            }
+//        }
 
+        s.append(mapStringRequest("R",resultMap.get(0)));
+        s.append(mapStringRequest("O",resultMap.get(1)));
+        s.append(mapStringRequest("Y",resultMap.get(2)));
+        s.append(mapStringRequest("LY",resultMap.get(3)));
+        s.append(mapStringRequest("LG",resultMap.get(4)));
+        s.append(mapStringRequest("G",resultMap.get(5)));
+        s.append(mapStringRequest("LB",resultMap.get(6)));
+        s.append(mapStringRequest("B",resultMap.get(7)));
+        s.append(mapStringRequest("DB",resultMap.get(8)));
+        s.append(mapStringRequest("P",resultMap.get(9)));
+        s.append(mapStringRequest("DP",resultMap.get(10)));
+        s.append(mapStringRequest("Pink",resultMap.get(11)));
+        s.append(",Black");
+        s.append(",Grey");
+        s.append(",White");
+        s.append(",LG");
 
-        for (Map.Entry m : histH.entrySet()) {
-            s.append(",H")
-                    .append(m.getKey());
-        }
-        for (Map.Entry m : histS.entrySet()) {
-            s.append(",S")
-                    .append(m.getKey());
-        }
-        for (Map.Entry m : histV.entrySet()) {
-            s.append(",V")
-                    .append(m.getKey());
-        }
         s.append(") VALUES ('")
                 .append(key)
                 .append("','")
                 .append(URL)
-        .append("'");
-        for (Map.Entry m : histH.entrySet()) {
-            s.append(",'")
-                    .append(m.getValue())
-                    .append("'");
-        }
-        for (Map.Entry m : histS.entrySet()) {
-            s.append(",'")
-                    .append(m.getValue())
-                    .append("'");
-        }
-        for (Map.Entry m : histV.entrySet()) {
-            s.append(",'")
-                    .append(m.getValue())
-                    .append("'");
-        }
+                .append("'");
+        s.append(mapColorStringRequest(resultMap.get(0)));
+        s.append(mapColorStringRequest(resultMap.get(1)));
+        s.append(mapColorStringRequest(resultMap.get(2)));
+        s.append(mapColorStringRequest(resultMap.get(3)));
+        s.append(mapColorStringRequest(resultMap.get(4)));
+        s.append(mapColorStringRequest(resultMap.get(5)));
+        s.append(mapColorStringRequest(resultMap.get(6)));
+        s.append(mapColorStringRequest(resultMap.get(7)));
+        s.append(mapColorStringRequest(resultMap.get(8)));
+        s.append(mapColorStringRequest(resultMap.get(9)));
+        s.append(mapColorStringRequest(resultMap.get(10)));
+        s.append(mapColorStringRequest(resultMap.get(11)));
+        s.append(",'" + black+"'");
+        s.append(",'" + grey+"'");
+        s.append(",'" + white+"'");
+        s.append(",'" + lg+"'");
         s.append(")");
 
 
+
+
+
+        return s.toString();
+    }
+    public static String mapStringRequest(String name,Map<Integer,Float> map){
+        String s="";
+        for (Map.Entry m:map.entrySet()){
+            s+=","+name+m.getKey();
+        }
+        return s;
+    }
+    public static String mapColorStringRequest(Map<Integer,Float> map){
+        StringBuilder s= new StringBuilder();
+        for (Map.Entry m:map.entrySet()){
+            s.append(",'").append(m.getValue()).append("'");
+
+        }
         return s.toString();
     }
 
