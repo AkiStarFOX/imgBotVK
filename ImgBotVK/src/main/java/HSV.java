@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HSV {
     float h;
@@ -11,6 +13,8 @@ public class HSV {
     String URL;
     Histo histo;
     PixelReader pixelReader;
+    HashMap<Integer,HSV> mapOfColors;
+    float countOfClaster;
 
 
 
@@ -25,10 +29,11 @@ public class HSV {
         this.URL = URL;
     }
 
-    public HSV(float h, float s, float v) {
+    public HSV(float h, float s, float v,float countOfClaster) {
         this.h = h;
         this.s = s;
         this.v = v;
+        this.countOfClaster = countOfClaster;
     }
 
     public HSV(int r, int g, int b) {
@@ -37,9 +42,10 @@ public class HSV {
         this.b = b;
         float[] hsv = new float[3];
         Color.RGBtoHSB(r,g,b,hsv);
-        this.h=hsv[0];
-        this.s=hsv[1];
-        this.v=hsv[2];
+        this.h=hsv[0]*360;
+        this.s=hsv[1]*100;
+        this.v=hsv[2]*100;
+
     }
     public HSV(int[][] pallete,String URL){
         hsvArray=new float[pallete.length][3];
@@ -54,9 +60,9 @@ public class HSV {
         }
 
     }
-    public HSV(PixelReader pixelReader,String URL){
+    public HSV(HashMap<Integer,HSV> map, String URL){
         this.URL=URL;
-        this.pixelReader = pixelReader;
+        this.mapOfColors=map;
     }
 
     public Histo getHisto() {
@@ -92,5 +98,13 @@ public class HSV {
 
     public float[][] getHsvArray() {
         return hsvArray;
+    }
+
+    public HashMap<Integer, HSV> getMapOfColors() {
+        return mapOfColors;
+    }
+
+    public float getCountOfClaster() {
+        return countOfClaster;
     }
 }

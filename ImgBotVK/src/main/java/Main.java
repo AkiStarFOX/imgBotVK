@@ -64,8 +64,11 @@ public class Main {
 //            statement.execute("ALTER TABLE imageshsv ADD COLUMN White DECIMAL(8,6) NOT NULL;");
 //            statement.execute("ALTER TABLE imageshsv ADD COLUMN LG DECIMAL(8,6) NOT NULL;");
 //        }
-//        for (int i = 0; i < 16; i++) {
-//            statement.execute("ALTER TABLE imageshsv ADD COLUMN O" + i + " DECIMAL(8,6) NOT NULL;");
+//        for (int i = 0; i < 8; i++) {
+//            statement.execute("ALTER TABLE clustertable ADD COLUMN H" + i + " DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE clustertable ADD COLUMN S" + i + " DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE clustertable ADD COLUMN V" + i + " DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE clustertable ADD COLUMN W" + i + " DECIMAL(8,6) NOT NULL;");
 //
 //        }
 
@@ -81,9 +84,10 @@ public class Main {
 //                    statement.addBatch(sqlAddWithHisto(m.getKey(),m.getValue().URL,m.getValue().getHisto().getH(),m.getValue().getHisto().getS(),m.getValue().getHisto().getV()));
 
 //                    statement.addBatch(sqlAdd(m.getKey(), m.getValue().getHslArray(), m.getValue().getURL()));
-                    PixelReader px = m.getValue().getPixelReader();
+//                    PixelReader px = m.getValue().getPixelReader();
 //                    System.out.println(sqlAddWithHisto(m.getKey(),m.getValue().getURL(),px.getResultMap(),px.getBlack(),px.getGrey(),px.getWhite(),px.getLigth_grey()));
-                    statement.addBatch(sqlAddWithHisto(m.getKey(), m.getValue().getURL(), px.getResultMap(), px.getBlack(), px.getGrey(), px.getWhite(), px.getLigth_grey()));
+//                    statement.addBatch(sqlAddWithHisto(m.getKey(), m.getValue().getURL(), px.getResultMap(), px.getBlack(), px.getGrey(), px.getWhite(), px.getLigth_grey()));
+                    statement.addBatch(sqlCluster(m.getKey(),m.getValue().getURL(),m.getValue().getMapOfColors()));
                 }
                 statement.executeBatch();
                 statement.clearBatch();
@@ -169,12 +173,20 @@ public class Main {
 //                        ImageIO.write(img, "png", file);
 //                        int[][] array = ColorThief.getPalette(img, 5, 1, false);
 //                        Histo histo = new Histo(img);
-                        PixelReader px = new PixelReader(img);
-                        System.out.println(list.get(i).getPhoto604());
+//                        PixelReader px = new PixelReader(img);
+//                        System.out.println(list.get(i).getPhoto604());
+                        HashMap<Integer,HSV> mapOfColors = new HashMap<>();
+
+                        KMeans kMeans = new KMeans(img,8);
+                        List<Cluster> l = kMeans.getPointsClusters();
+
+                        System.out.println(l.get(0).getPoints().get(0).x);
+                        for (int c=0;c<l.size();c++){
+                            mapOfColors.put(c,new HSV((float)l.get(c).getCentroid().x,(float)l.get(c).getCentroid().y,(float)l.get(c).getCentroid().z,l.get(c).getPoints().size()/kMeans.getCountOfPixel()));
+                        }
 
 
-
-                        hashMap.put(list.get(i).getId(), new HSV(px, list.get(i).getPhoto1280()));
+                        hashMap.put(list.get(i).getId(), new HSV(mapOfColors, list.get(i).getPhoto1280()));
 
 
                     }
@@ -277,6 +289,25 @@ public class Main {
             s.append(",'").append(m.getValue()).append("'");
 
         }
+        return s.toString();
+    }
+
+    private static String sqlCluster(Integer key, String URL,HashMap<Integer,HSV> map){
+        StringBuilder s = new StringBuilder("INSERT IGNORE INTO ClusterTable (Img_id,URL");
+        for(Map.Entry e:map.entrySet()){
+            s.append(",H"+e.getKey()).append(",S"+e.getKey()).append(",V"+e.getKey()).append(",W"+e.getKey());
+        }
+        s.append(") VALUES (");
+        s.append("'" + key + "',").append("'"+URL+"'");
+        for(Map.Entry e:map.entrySet()){
+            HSV hsv = (HSV)e.getValue();
+            s.append(",'"+hsv.getH()/360+"'");
+            s.append(",'"+hsv.getS()/100+"'");
+            s.append(",'"+hsv.getV()/100+"'");
+            s.append(",'"+hsv.getCountOfClaster()+"'");
+
+        }
+        s.append(")");
         return s.toString();
     }
 
