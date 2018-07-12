@@ -69,6 +69,7 @@ public class Main {
 //            statement.execute("ALTER TABLE clustertable ADD COLUMN S" + i + " DECIMAL(8,6) NOT NULL;");
 //            statement.execute("ALTER TABLE clustertable ADD COLUMN V" + i + " DECIMAL(8,6) NOT NULL;");
 //            statement.execute("ALTER TABLE clustertable ADD COLUMN W" + i + " DECIMAL(8,6) NOT NULL;");
+//            statement.execute("ALTER TABLE clustertable ADD COLUMN WSV" + i + " DECIMAL(8,6) NOT NULL;");
 //
 //        }
 
