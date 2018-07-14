@@ -7,9 +7,11 @@ import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.UserAuthResponse;
 import com.vk.api.sdk.objects.account.Info;
 import com.vk.api.sdk.objects.photos.Photo;
+import com.vk.api.sdk.objects.photos.PhotoUpload;
 import com.vk.api.sdk.objects.photos.PhotoXtrRealOffset;
 import com.vk.api.sdk.objects.photos.responses.GetAllResponse;
 import com.vk.api.sdk.objects.photos.responses.GetResponse;
+import com.vk.api.sdk.objects.photos.responses.MessageUploadResponse;
 import org.w3c.dom.css.RGBColor;
 
 
@@ -49,6 +51,7 @@ public class Main {
         UserActor actor = initVkApi(apiClient, properties);
         Connection connection = DriverManager.getConnection(MYSQL_URL, MYSQL_LOGIN, MYSQL_PASSWORD);
         Statement statement = connection.createStatement();
+        GroupActor gActor = new GroupActor(167356546, "419456ea8317c9b6c248041212dc3dd36189bd49440f37d0be47d94cee53441defa5c6efa0d4c372e24cd");
 
 
 //      Получение токена
@@ -76,7 +79,7 @@ public class Main {
 
         while (true) {
             List<Photo> list = getPhotoFromVK(offset, apiClient, actor);
-            HashMap<Integer, HSV> map = downloadImg(list);
+            HashMap<Integer, HSV> map = downloadImg(list,gActor,apiClient);
 
 
             try {
@@ -88,7 +91,8 @@ public class Main {
 //                    PixelReader px = m.getValue().getPixelReader();
 //                    System.out.println(sqlAddWithHisto(m.getKey(),m.getValue().getURL(),px.getResultMap(),px.getBlack(),px.getGrey(),px.getWhite(),px.getLigth_grey()));
 //                    statement.addBatch(sqlAddWithHisto(m.getKey(), m.getValue().getURL(), px.getResultMap(), px.getBlack(), px.getGrey(), px.getWhite(), px.getLigth_grey()));
-                    statement.addBatch(sqlCluster(m.getKey(),m.getValue().getURL(),m.getValue().getMapOfColors()));
+                    statement.addBatch(sqlCluster(m.getKey(),m.getValue().getURL(),m.getValue().getMapOfColors(),m.getValue().getIdofHisto()));
+                    System.out.println("ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
                 }
                 statement.executeBatch();
                 statement.clearBatch();
@@ -146,7 +150,7 @@ public class Main {
         }
     }
 
-    public static HashMap<Integer, HSV> downloadImg(List<Photo> list) {
+    public static HashMap<Integer, HSV> downloadImg(List<Photo> list,GroupActor actor,VkApiClient vk) {
         File file = null;
         BufferedImage img = null;
         boolean isLoaded = true;
@@ -187,7 +191,42 @@ public class Main {
                         }
 
 
-                        hashMap.put(list.get(i).getId(), new HSV(mapOfColors, list.get(i).getPhoto1280()));
+                        //рисование гисты
+                        BufferedImage img2 = new BufferedImage(600, mapOfColors.size()*100, BufferedImage.TYPE_3BYTE_BGR);
+                        Graphics2D g2d = img2.createGraphics();
+
+                        try {
+                            g2d.setBackground(Color.WHITE);
+                            g2d.fillRect(0, 0, 600, 800);
+
+                            int y=0;
+                            for(Map.Entry e:mapOfColors.entrySet()) {
+                                HSV hsv = (HSV) e.getValue();
+                                Color color = new Color(Color.HSBtoRGB(hsv.getH()/360, hsv.getS()/100, hsv.getV()/100));
+                                g2d.setColor(color);
+                                g2d.fillRect(0, y, (int)(hsv.getCountOfClaster()*60)*10, 100);
+                                g2d.setColor(Color.BLACK);
+                                g2d.drawRect(0,y,(int)(hsv.getCountOfClaster()*60)*10,100);
+                                y += 100;
+                            }
+                        } finally {
+                            g2d.dispose();
+                        }
+                        File file2 = new File("test"+i+".png");
+                        ImageIO.write(img2, "PNG", file2);
+
+                        //загрузка гисты
+                        PhotoUpload photoUpload = vk.photos().getMessagesUploadServer(actor).execute();
+                        MessageUploadResponse messageUploadResponse = vk.upload().photoMessage(photoUpload.getUploadUrl(), file2).execute();
+
+                        List<Photo> photoList = vk.photos().saveMessagesPhoto(actor, messageUploadResponse.getPhoto())
+                                .server(messageUploadResponse.getServer())
+                                .hash(messageUploadResponse.getHash())
+                                .execute();
+                        Photo photo = photoList.get(0);
+                        String colorsOfimg = "photo" + photo.getOwnerId() + "_" + photo.getId();
+
+                        hashMap.put(list.get(i).getId(), new HSV(mapOfColors, list.get(i).getPhoto1280(),colorsOfimg));
 
 
                     }
@@ -293,13 +332,13 @@ public class Main {
         return s.toString();
     }
 
-    private static String sqlCluster(Integer key, String URL,HashMap<Integer,HSV> map){
-        StringBuilder s = new StringBuilder("INSERT IGNORE INTO ClusterTable (Img_id,URL");
+    private static String sqlCluster(Integer key, String URL,HashMap<Integer,HSV> map,String idOfHisto){
+        StringBuilder s = new StringBuilder("INSERT IGNORE INTO ClusterTable (Img_id,URL,Histo_id");
         for(Map.Entry e:map.entrySet()){
             s.append(",H"+e.getKey()).append(",S"+e.getKey()).append(",V"+e.getKey()).append(",W"+e.getKey());
         }
         s.append(") VALUES (");
-        s.append("'" + key + "',").append("'"+URL+"'");
+        s.append("'" + key + "',").append("'"+URL+"',").append("'"+idOfHisto+"'");
         for(Map.Entry e:map.entrySet()){
             HSV hsv = (HSV)e.getValue();
             s.append(",'"+hsv.getH()/360+"'");

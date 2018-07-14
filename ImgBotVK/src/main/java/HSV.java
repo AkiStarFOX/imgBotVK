@@ -15,6 +15,7 @@ public class HSV {
     PixelReader pixelReader;
     HashMap<Integer,HSV> mapOfColors;
     float countOfClaster;
+    String idofHisto;
 
 
 
@@ -60,9 +61,10 @@ public class HSV {
         }
 
     }
-    public HSV(HashMap<Integer,HSV> map, String URL){
+    public HSV(HashMap<Integer,HSV> map, String URL,String idofHisto){
         this.URL=URL;
         this.mapOfColors=map;
+        this.idofHisto = idofHisto;
     }
 
     public Histo getHisto() {
@@ -106,5 +108,9 @@ public class HSV {
 
     public float getCountOfClaster() {
         return countOfClaster;
+    }
+
+    public String getIdofHisto() {
+        return idofHisto;
     }
 }
